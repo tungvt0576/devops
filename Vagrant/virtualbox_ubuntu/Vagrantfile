@@ -7,7 +7,7 @@
 # you're doing.
 Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/bionic64"
-  config.vm.network "private_network", ip: "192.168.0.100"
+  config.vm.network "private_network", ip: "192.168.10.100"
   config.vm.hostname = "master"
 
   config.vm.provider "virtualbox" do |vb|
@@ -28,9 +28,9 @@ Vagrant.configure("2") do |config|
     systemctl restart sshd
     # Ghi nội dung sau ra file /etc/hosts để truy cập được các máy theo HOSTNAME
     sh -c ' cat >>/etc/hosts<<EOF
-    192.168.0.100 master
-    192.168.0.101 kworker1
-    192.168.0.102 kworker2
+    192.168.10.100 master
+    192.168.10.101 kworker1
+    192.168.10.102 kworker2
     EOF'
     SHELL
  
