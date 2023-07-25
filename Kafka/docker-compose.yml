@@ -1,0 +1,82 @@
+version: '2.1'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: zookeeper
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/zookeeper/zookeeper_server_jaas.conf
+                -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+                -Dzookeeper.allowSaslFailedClients=false
+                -Dzookeeper.requireClientAuthScheme=sasl"
+      SERVER_JVMFLAGS: "-Djava.security.auth.login.config=/zookeeper/zookeeper_server_jaas.conf"
+      ZOOKEEPER_SASL_ENABLED: "true"
+      ZOOKEEPER_SASL_USERS: "kafka::kafka"
+    volumes:
+      - ./zookeeper_server_jaas.conf:/zookeeper/zookeeper_server_jaas.conf
+    networks:
+      - kafka
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: kafka.dasvision.vn
+    container_name: kafka
+    restart: always
+    ports:
+      - "9093:9093"
+      - "9094:9094"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENERS: "SASL_PLAINTEXT://:9093,SASL_SSL://:9094"
+      KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka.dasvision.vn:9093,SASL_SSL://kafka.dasvision.vn:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL"
+      KAFKA_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-512"
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-512"
+      #KAFKA_INTER_BROKER_LISTENER_NAME: "SASL_SSL"
+      KAFKA_ZOOKEEPER_SASL_ENABLED: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: "SCRAM-SHA-512"
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: "SASL,SASL_SSL"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_OPTS: "-Dzookeeper.sasl.client=true
+        -Dzookeeper.sasl.clientconfig=Client
+        -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      KAFKA_SSL_KEYSTORE_FILENAME: "kafka.server.keystore.jks"
+      KAFKA_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/kafka.server.truststore.jks"
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: "dasvision"
+      #KAFKA_SSL_TRUSTSTORE_FILENAME: "kafka.server.truststore.jks"
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: "key-credentials"
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: "key-credentials"
+      KAFKA_SSL_KEY_CREDENTIALS: "key-credentials"
+      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+
+
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      #KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      KAFKA_SSL_CLIENT_AUTH: "none"
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: "SASL_SSL"
+      KAFKA_MIN_INSYNC_REPLICAS: "1"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka.dasvision.vn:9094"
+      KAFKA_OFFSETS_RETENTION_MINUTES: "172800"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO,kafka.controller=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: "INFO"
+      KAFKA_SUPER_USERS: "User:kafka"
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+      - ./kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+      - ./sasl-config.properties:/etc/kafka/sasl-config.properties
+      - ./client.properties:/etc/kafka/client.properties
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka
+
+networks:
+  kafka:

@@ -1,0 +1,39 @@
+version: '3'
+services:
+  jenkins:
+    restart: always
+    container_name: jenkins
+    image: myjenkins
+    volumes:
+      - ./jenkins/data:/var/jenkins_home
+      - ./jenkins/docker-certs:/certs/client
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 0
+    networks:
+      - cicd_network
+    ports:
+      - 8080:8080
+
+  jenkins-dind:
+    restart: always
+    container_name: jenkins-dind
+    image: docker:dind
+    privileged: true
+    command: --storage-driver=overlay2
+    volumes:
+      - ./jenkins/docker-certs:/certs/client
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    networks:
+      cicd_network:
+        aliases:
+          - docker
+    ports:
+      - 2376:2376
+
+networks:
+  cicd_network:
+    external:
+      name: cicd
