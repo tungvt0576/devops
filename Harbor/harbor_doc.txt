@@ -1,0 +1,96 @@
+openssl req -x509 -new -nodes -sha512 -days 3650 \
+ -subj "/C=CN/ST=Hanoi/L=Hanoi/O=dasvision/OU=dasvision/CN=harbor.dasvision.vn" \
+ -key ca.key \
+ -out ca.crt
+
+
+openssl genrsa -out harbor.dasvision.vn.key 4096
+
+
+openssl req -sha512 -new \
+    -subj "/C=CN/ST=Hanoi/L=Hanoi/O=dasvision/OU=dasvision/CN=harbor.dasvision.vn" \
+    -key harbor.dasvision.vn.key \
+    -out harbor.dasvision.vn.csr
+
+
+cat > v3.ext <<-EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @dasvision
+
+[dasvision]
+DNS.1=harbor.dasvision.vn
+DNS.2=harbor.dasvision
+DNS.3=192.168.0.155
+EOF
+
+
+openssl x509 -req -sha512 -days 3650 \
+    -extfile v3.ext \
+    -CA ca.crt -CAkey ca.key -CAcreateserial \
+    -in harbor.dasvision.vn.csr \
+    -out harbor.dasvision.vn.crt
+
+
+cp harbor.dasvision.vn.crt /home/dev5/harbor/data/cert/
+cp harbor.dasvision.vn.key /home/dev5/harbor/data/cert/
+
+
+
+openssl x509 -inform PEM -in harbor.dasvision.vn.crt -out harbor.dasvision.vn.cert
+
+
+sudo cp harbor.dasvision.vn.cert dep@192.168.0.86:/etc/docker/certs.d/harbor.dasvision.vn/
+sudo cp harbor.dasvision.vn.key /etc/docker/certs.d/harbor.dasvision.vn/
+sudo cp ca.crt /etc/docker/certs.d/harbor.dasvision.vn/
+
+
+
+
+ wget https://github.com/goharbor/harbor/releases/download/v2.8.2/harbor-offline-installer-v2.8.2.tgz
+
+tar xzvf  harbor-offline-installer-v2.8.2.tgz
+
+{
+"allow-nondistributable-artifacts" : ["https://harbor.dasvision.vn:443"]
+}
+
+docker pull harbor.dasvision.vn/dascam/dascam_offical
+
+- DOCKER_OPTS=--allow-nondistributable-artifacts --tlsverify --tlscacert=/certs/ca.crt --tlscert=/certs/ harbor.dasvision.vn.cert --tlskey=/certs/harbor.dasvision.vn.key
+
+
+extra_hosts:
+      - "harbor.dasvision.vn:192.168.0.155"
+
+
+
+
+//Dockerfile for Jennkins 
+# Copying our self-signed CA's certs so Jenkins-OS, Jenkins-JVM, and Jenkins-git will use it in the chain of trust
+COPY certs/ca.crt /usr/local/share/ca-certificates/
+COPY certs/harbor.dasvision.vn.cert /usr/local/share/ca-certificates/
+COPY certs/harbor.dasvision.vn.key /usr/local/share/ca-certificates/
+
+# Importing your CA-cert to Java keystore
+RUN keytool -import -noprompt -trustcacerts -alias dasvision -file /usr/local/share/ca-certificates/ca.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
+
+# Update your system cert-store
+RUN update-ca-certificates
+
+# Configure Jenkins git to use your system store as a trusted one
+RUN git config --global http.sslCAinfo /etc/ssl/certs/ca-certificates.crt
+
+
+FROM docker:dind
+
+# Copy certs folder to the image
+COPY ./certs/ /certs
+
+# Providing Harbor's and our CA's (our private registry) certs to Docker that is linked to Jenkins (docker:dind)
+RUN mkdir -p /etc/docker/certs.d/harbor.dasvision.vn
+COPY certs/harbor.dasvision.vn.cert /etc/docker/certs.d/harbor.dasvision.vn
+COPY certs/harbor.dasvision.vn.key /etc/docker/certs.d/harbor.dasvision.vn
+COPY certs/ca.crt /etc/docker/certs.d/harbor.dasvision.vn
