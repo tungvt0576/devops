@@ -24,7 +24,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.3.2
-    hostname: kafka.dasvision.vn
+    hostname: kafka.tungvt.vn
     container_name: kafka
     restart: always
     ports:
@@ -33,7 +33,7 @@ services:
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENERS: "SASL_PLAINTEXT://:9093,SASL_SSL://:9094"
-      KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka.dasvision.vn:9093,SASL_SSL://kafka.dasvision.vn:9094"
+      KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka.tungvt.vn:9093,SASL_SSL://kafka.tungvt.vn:9094"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL"
       KAFKA_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-512"
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-512"
@@ -49,7 +49,7 @@ services:
         -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
       KAFKA_SSL_KEYSTORE_FILENAME: "kafka.server.keystore.jks"
       KAFKA_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/kafka.server.truststore.jks"
-      KAFKA_SSL_TRUSTSTORE_PASSWORD: "dasvision"
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: "tungvt"
       #KAFKA_SSL_TRUSTSTORE_FILENAME: "kafka.server.truststore.jks"
       KAFKA_SSL_TRUSTSTORE_CREDENTIALS: "key-credentials"
       KAFKA_SSL_KEYSTORE_CREDENTIALS: "key-credentials"
@@ -63,7 +63,7 @@ services:
       KAFKA_SSL_CLIENT_AUTH: "none"
       KAFKA_SECURITY_INTER_BROKER_PROTOCOL: "SASL_SSL"
       KAFKA_MIN_INSYNC_REPLICAS: "1"
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka.dasvision.vn:9094"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka.tungvt.vn:9094"
       KAFKA_OFFSETS_RETENTION_MINUTES: "172800"
       KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO,kafka.controller=INFO"
       KAFKA_LOG4J_ROOT_LOGLEVEL: "INFO"

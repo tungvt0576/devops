@@ -2,7 +2,7 @@
 
 # The IP address or hostname to access admin UI and registry service.
 # DO NOT use localhost or 127.0.0.1, because Harbor needs to be accessed by external clients.
-hostname: harbor.dasvision.vn
+hostname: harbor.tungvt.vn
 
 # http related config
 http:
@@ -14,8 +14,8 @@ https:
   # https port for harbor, default is 443
   port: 443
   # The path of cert and key files for nginx
-  certificate: /home/dev5/harbor/data/cert/harbor.dasvision.vn.crt
-  private_key: /home/dev5/harbor/data/cert/harbor.dasvision.vn.key
+  certificate: /home/dev5/harbor/data/cert/harbor.tungvt.vn.crt
+  private_key: /home/dev5/harbor/data/cert/harbor.tungvt.vn.key
 
 # # Uncomment following will enable tls communication between all harbor components
 # internal_tls:

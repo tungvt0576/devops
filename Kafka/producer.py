@@ -1,7 +1,7 @@
 from confluent_kafka import Producer
 
 # Tạo một instance của Producer với các cấu hình
-kafkaBrokers='kafka.dasvision.vn:9094'
+kafkaBrokers='kafka.tungvt.vn:9094'
 caRootLocation='./secrets/CARoot.pem'
 producer = Producer({
     'bootstrap.servers': kafkaBrokers,

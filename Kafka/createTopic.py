@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     serial_number = sys.argv[1]
     password = generate_random_password()
-    bootstrap_servers = 'kafka.dasvision.vn:9094'
+    bootstrap_servers = 'kafka.tungvt.vn:9094'
     security_protocol = 'SASL_SSL'
     sasl_mechanism = 'SCRAM-SHA-512'
     ssl_cafile = '/home/dep/dascam/kafka/secrets/CARoot.pem'

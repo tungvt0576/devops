@@ -22,7 +22,7 @@ def list_topics(bootstrap_servers, security_protocol, sasl_mechanism, ssl_cafile
         print()
 
 # Thay đổi các giá trị sau theo yêu cầu của bạn
-bootstrap_servers = 'kafka.dasvision.vn:9094'
+bootstrap_servers = 'kafka.tungvt.vn:9094'
 security_protocol = 'SASL_SSL'
 sasl_mechanism = 'SCRAM-SHA-512'
 ssl_cafile = './secrets/CARoot.pem'

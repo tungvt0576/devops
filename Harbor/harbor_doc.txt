@@ -1,16 +1,16 @@
 openssl req -x509 -new -nodes -sha512 -days 3650 \
- -subj "/C=CN/ST=Hanoi/L=Hanoi/O=dasvision/OU=dasvision/CN=harbor.dasvision.vn" \
+ -subj "/C=CN/ST=Hanoi/L=Hanoi/O=tungvt/OU=tungvt/CN=harbor.tungvt.vn" \
  -key ca.key \
  -out ca.crt
 
 
-openssl genrsa -out harbor.dasvision.vn.key 4096
+openssl genrsa -out harbor.tungvt.vn.key 4096
 
 
 openssl req -sha512 -new \
-    -subj "/C=CN/ST=Hanoi/L=Hanoi/O=dasvision/OU=dasvision/CN=harbor.dasvision.vn" \
-    -key harbor.dasvision.vn.key \
-    -out harbor.dasvision.vn.csr
+    -subj "/C=CN/ST=Hanoi/L=Hanoi/O=tungvt/OU=tungvt/CN=harbor.tungvt.vn" \
+    -key harbor.tungvt.vn.key \
+    -out harbor.tungvt.vn.csr
 
 
 cat > v3.ext <<-EOF
@@ -18,11 +18,11 @@ authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 extendedKeyUsage = serverAuth
-subjectAltName = @dasvision
+subjectAltName = @tungvt
 
-[dasvision]
-DNS.1=harbor.dasvision.vn
-DNS.2=harbor.dasvision
+[tungvt]
+DNS.1=harbor.tungvt.vn
+DNS.2=harbor.tungvt
 DNS.3=192.168.0.155
 EOF
 
@@ -30,21 +30,21 @@ EOF
 openssl x509 -req -sha512 -days 3650 \
     -extfile v3.ext \
     -CA ca.crt -CAkey ca.key -CAcreateserial \
-    -in harbor.dasvision.vn.csr \
-    -out harbor.dasvision.vn.crt
+    -in harbor.tungvt.vn.csr \
+    -out harbor.tungvt.vn.crt
 
 
-cp harbor.dasvision.vn.crt /home/dev5/harbor/data/cert/
-cp harbor.dasvision.vn.key /home/dev5/harbor/data/cert/
+cp harbor.tungvt.vn.crt /home/dev5/harbor/data/cert/
+cp harbor.tungvt.vn.key /home/dev5/harbor/data/cert/
 
 
 
-openssl x509 -inform PEM -in harbor.dasvision.vn.crt -out harbor.dasvision.vn.cert
+openssl x509 -inform PEM -in harbor.tungvt.vn.crt -out harbor.tungvt.vn.cert
 
 
-sudo cp harbor.dasvision.vn.cert dep@192.168.0.86:/etc/docker/certs.d/harbor.dasvision.vn/
-sudo cp harbor.dasvision.vn.key /etc/docker/certs.d/harbor.dasvision.vn/
-sudo cp ca.crt /etc/docker/certs.d/harbor.dasvision.vn/
+sudo cp harbor.tungvt.vn.cert dep@192.168.0.86:/etc/docker/certs.d/harbor.tungvt.vn/
+sudo cp harbor.tungvt.vn.key /etc/docker/certs.d/harbor.tungvt.vn/
+sudo cp ca.crt /etc/docker/certs.d/harbor.tungvt.vn/
 
 
 
@@ -54,16 +54,16 @@ sudo cp ca.crt /etc/docker/certs.d/harbor.dasvision.vn/
 tar xzvf  harbor-offline-installer-v2.8.2.tgz
 
 {
-"allow-nondistributable-artifacts" : ["https://harbor.dasvision.vn:443"]
+"allow-nondistributable-artifacts" : ["https://harbor.tungvt.vn:443"]
 }
 
-docker pull harbor.dasvision.vn/dascam/dascam_offical
+docker pull harbor.tungvt.vn/dascam/dascam_offical
 
-- DOCKER_OPTS=--allow-nondistributable-artifacts --tlsverify --tlscacert=/certs/ca.crt --tlscert=/certs/ harbor.dasvision.vn.cert --tlskey=/certs/harbor.dasvision.vn.key
+- DOCKER_OPTS=--allow-nondistributable-artifacts --tlsverify --tlscacert=/certs/ca.crt --tlscert=/certs/ harbor.tungvt.vn.cert --tlskey=/certs/harbor.tungvt.vn.key
 
 
 extra_hosts:
-      - "harbor.dasvision.vn:192.168.0.155"
+      - "harbor.tungvt.vn:192.168.0.155"
 
 
 
@@ -71,11 +71,11 @@ extra_hosts:
 //Dockerfile for Jennkins 
 # Copying our self-signed CA's certs so Jenkins-OS, Jenkins-JVM, and Jenkins-git will use it in the chain of trust
 COPY certs/ca.crt /usr/local/share/ca-certificates/
-COPY certs/harbor.dasvision.vn.cert /usr/local/share/ca-certificates/
-COPY certs/harbor.dasvision.vn.key /usr/local/share/ca-certificates/
+COPY certs/harbor.tungvt.vn.cert /usr/local/share/ca-certificates/
+COPY certs/harbor.tungvt.vn.key /usr/local/share/ca-certificates/
 
 # Importing your CA-cert to Java keystore
-RUN keytool -import -noprompt -trustcacerts -alias dasvision -file /usr/local/share/ca-certificates/ca.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
+RUN keytool -import -noprompt -trustcacerts -alias tungvt -file /usr/local/share/ca-certificates/ca.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
 
 # Update your system cert-store
 RUN update-ca-certificates
@@ -90,7 +90,7 @@ FROM docker:dind
 COPY ./certs/ /certs
 
 # Providing Harbor's and our CA's (our private registry) certs to Docker that is linked to Jenkins (docker:dind)
-RUN mkdir -p /etc/docker/certs.d/harbor.dasvision.vn
-COPY certs/harbor.dasvision.vn.cert /etc/docker/certs.d/harbor.dasvision.vn
-COPY certs/harbor.dasvision.vn.key /etc/docker/certs.d/harbor.dasvision.vn
-COPY certs/ca.crt /etc/docker/certs.d/harbor.dasvision.vn
+RUN mkdir -p /etc/docker/certs.d/harbor.tungvt.vn
+COPY certs/harbor.tungvt.vn.cert /etc/docker/certs.d/harbor.tungvt.vn
+COPY certs/harbor.tungvt.vn.key /etc/docker/certs.d/harbor.tungvt.vn
+COPY certs/ca.crt /etc/docker/certs.d/harbor.tungvt.vn
