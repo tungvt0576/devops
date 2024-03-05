@@ -58,7 +58,7 @@ tar xzvf  harbor-offline-installer-v2.8.2.tgz
 "allow-nondistributable-artifacts" : ["https://harbor.tungvt.vn:443"]
 }
 
-docker pull harbor.tungvt.vn/dascam/dascam_offical
+docker pull harbor.tungvt.vn/demo/demo_offical
 
 - DOCKER_OPTS=--allow-nondistributable-artifacts --tlsverify --tlscacert=/certs/ca.crt --tlscert=/certs/ harbor.tungvt.vn.cert --tlskey=/certs/harbor.tungvt.vn.key
 

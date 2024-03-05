@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nia-saas-be
+  name: my-project-be
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nia-saas-be
+      app: my-project-be
   template:
     metadata:
       labels:
-        app: nia-saas-be
+        app: my-project-be
     spec:
       containers:
-      - name: nia-saas-be
-        image: tungvt.vn/nia-saas-be-dev-kube
+      - name: my-project-be
+        image: tungvt.vn/my-project-be-dev-kube
         ports:
         - containerPort: 8099
       imagePullSecrets:
@@ -31,11 +31,11 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nia-saas-be
+      app: my-project-be
   template:
     metadata:
       labels:
-        app: nia-saas-be
+        app: my-project-be
     spec:
       containers:
       - name: postgresql-server
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nia-saas-be-svc
+  name: my-project-be-svc
 spec:
   type: NodePort
   ports:
@@ -72,4 +72,4 @@ spec:
     name: db
     nodePort: 31032
   selector:
-    app: nia-saas-be
+    app: my-project-be

@@ -141,9 +141,9 @@ if __name__ == '__main__':
     bootstrap_servers = 'kafka.tungvt.vn:9094'
     security_protocol = 'SASL_SSL'
     sasl_mechanism = 'SCRAM-SHA-512'
-    ssl_cafile = '/home/dep/dascam/kafka/secrets/CARoot.pem'
-    ssl_certfile = '/home/dep/dascam/kafka/secrets/certificate.pem'
-    ssl_keyfile = '/home/dep/dascam/kafka/secrets/key.pem'
+    ssl_cafile = '/home/dep/demo/kafka/secrets/CARoot.pem'
+    ssl_certfile = '/home/dep/demo/kafka/secrets/certificate.pem'
+    ssl_keyfile = '/home/dep/demo/kafka/secrets/key.pem'
     num_partitions = 3
     replication_factor = 1
     create_user(serial_number, password)
