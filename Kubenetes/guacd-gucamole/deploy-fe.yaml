@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nia-saas-fe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nia-saas-fe
+  template:
+    metadata:
+      labels:
+        app: nia-saas-fe
+    spec:
+      containers:
+      - name: nia-saas-fe
+        image: tungvt.vn/nia-saas-fe-dev-kube
+        ports:
+        - containerPort: 8086
+      imagePullSecrets:
+      - name: mycredential
+      - name: myca
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nia-saas-fe-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 8086
+    targetPort: 8086
+    protocol: TCP
+    name: http
+    nodePort: 31086
+  selector:
+    app: nia-saas-fe

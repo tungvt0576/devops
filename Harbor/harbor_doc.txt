@@ -43,6 +43,7 @@ openssl x509 -inform PEM -in harbor.tungvt.vn.crt -out harbor.tungvt.vn.cert
 
 
 sudo cp harbor.tungvt.vn.cert dep@192.168.0.86:/etc/docker/certs.d/harbor.tungvt.vn/
+sudo cp harbor.tungvt.vn.cert /etc/docker/certs.d/harbor.tungvt.vn/
 sudo cp harbor.tungvt.vn.key /etc/docker/certs.d/harbor.tungvt.vn/
 sudo cp ca.crt /etc/docker/certs.d/harbor.tungvt.vn/
 

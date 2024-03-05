@@ -1,5 +1,5 @@
 container runtime is not running
 
-rm /etc/containerd/config.toml
-systemctl restart containerd
+sudo rm /etc/containerd/config.toml
+sudo systemctl restart containerd
 kubeadm init

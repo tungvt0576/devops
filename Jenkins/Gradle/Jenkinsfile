@@ -1,0 +1,60 @@
+
+//Lưu ý nhớ thêm plugins sonarqube trong file 
+pipeline {
+    agent any
+    tools{
+         gradle 'gradle'
+    }
+    stages {
+        stage('1. Check out') {
+            steps {
+                checkout scmGit(branches: [[name: '*/prd']], extensions: [], userRemoteConfigs: [[credentialsId: 'gradle_example', url: 'http://url_to_project/gradle_example']])
+            }
+        }
+        stage('2.Gradle Build') {
+            steps {
+                sh 'gradle wrapper'
+                sh './gradlew build'
+            }
+          
+        }
+        stage('3.SonarQube analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQubeScanner' 
+                    withSonarQubeEnv('sonarqube') {
+                        sh "./gradlew sonar \
+                            -Dsonar.projectKey=gradle_example \
+                            -Dsonar.host.url=sonarqube_url \
+                            -Dsonar.login=sqp_4f6acfd722b3a59668a2ba25e71486af52963152"
+                            //Phần này copy ở sonarqube
+                    }
+                }
+            }
+        }
+        stage("4.Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                     script {
+                        def qg = waitForQualityGate()
+                         if (qg.status != 'OK') {
+                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                        else echo "Good"
+                     }
+                }
+            }
+        }
+        stage('5. Build Docker Image') {
+            steps {
+                sh "docker build --rm -t gradle_example-prd . "
+            }
+        }
+        stage('6. Deploy on Product Server') {
+            steps {
+                    sh "chmod 755 deploy.sh"
+                    sh "./deploy.sh gradle_example-prd 8066"
+            }
+        }
+    }
+}

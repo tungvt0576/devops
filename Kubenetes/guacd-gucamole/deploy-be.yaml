@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nia-saas-be
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nia-saas-be
+  template:
+    metadata:
+      labels:
+        app: nia-saas-be
+    spec:
+      containers:
+      - name: nia-saas-be
+        image: tungvt.vn/nia-saas-be-dev-kube
+        ports:
+        - containerPort: 8099
+      imagePullSecrets:
+      - name: mycredential
+      - name: myca
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nia-saas-be
+  template:
+    metadata:
+      labels:
+        app: nia-saas-be
+    spec:
+      containers:
+      - name: postgresql-server
+        image: postgres
+        ports:
+        - containerPort: 5432
+        envFrom:
+          - configMapRef:
+              name: postgres-config
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgresql-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nia-saas-be-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 8099
+    targetPort: 8099
+    protocol: TCP
+    name: be
+    nodePort: 31099
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: db
+    nodePort: 31032
+  selector:
+    app: nia-saas-be

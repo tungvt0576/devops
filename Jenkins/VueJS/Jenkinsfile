@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+    stages {
+        stage('1. Check out') {
+            steps {
+               checkout scmGit(branches: [[name: '*/prd']], extensions: [], userRemoteConfigs: [[credentialsId: 'vuejs_example', url: 'http://192.168.0.52:20000/thangnx/vuejs_example']])
+            }
+        }
+        stage('2.SonarQube analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQubeScanner' // Tên cài đặt của công cụ SonarQube Scanner trong Jenkins
+                    withSonarQubeEnv('sonarqube') {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                          -Dsonar.projectKey=vuejs_example \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://192.168.0.86:9000 \
+                          -Dsonar.login=sqp_1d13da28c814f1dfdb0769db6c9bcfdd09698b2b"
+                    }
+                }
+            }
+        }
+        stage("3.Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                     script {
+                        def qg = waitForQualityGate()
+                         if (qg.status != 'OK') {
+                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                        else echo "Good"
+                     }
+                }
+            }
+        }
+        stage('4.Change port for nginx') {
+            steps {
+                sh "chmod 755 modifyPortNginx.sh"
+                sh "./modifyPortNginx.sh 8066"
+            }
+        }
+        stage('5. Build Docker Image') {
+            steps {
+                sh "docker build -t vuejs_example-prd ."
+            }
+        }
+        stage('6. Deploy on Product Server') {
+            steps {
+                    sh "chmod 755 deploy.sh"
+                    sh "./deploy.sh vuejs_example-prd 8068"
+            }
+        }
+    }
+}

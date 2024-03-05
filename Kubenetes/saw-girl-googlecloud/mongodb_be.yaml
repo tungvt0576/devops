@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saw-girl-be-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saw-girl-be
+  template:
+    metadata:
+      labels:
+        app: saw-girl-be
+    spec:
+      containers:
+      - name: saw-girl-be
+        image: gcr.io/tiktok-395207/saw-girl-be
+        ports:
+        - containerPort: 8888
+        envFrom:
+        - configMapRef:
+            name: saw-girl-be-config
+      - name: mongo-db
+        image: gcr.io/tiktok-395207/mongo
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: amonyos
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saw-girl-be-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: saw-girl-be
+  ports:
+  - name: backend
+    protocol: TCP
+    port: 8888
+    targetPort: 8888
+  - name: mongo-db
+    protocol: TCP
+    port: 27017
+    targetPort: 27017
+  
